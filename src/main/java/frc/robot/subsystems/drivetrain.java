@@ -80,6 +80,11 @@ public class drivetrain extends SubsystemBase {
 
         leftrear.follow(leftfront);
         rightrear.follow(rightfront);
+
+        leftfront.restoreFactoryDefaults();
+        leftrear.restoreFactoryDefaults();
+        rightfront.restoreFactoryDefaults();
+        rightrear.restoreFactoryDefaults();
         
         // leftrear.set(ControlMode.Follower, leftfront.getDeviceId());
         // rightrear.set(ControlMode.Follower, rightfront.getDeviceId());   
