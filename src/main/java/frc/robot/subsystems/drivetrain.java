@@ -39,13 +39,8 @@ public class drivetrain extends SubsystemBase {
     private CANSparkMax rightfront;
     private CANSparkMax rightrear;
 
-    private static final int leftfrontid = 1;
-    private static final int leftrearid = 2;
-    private static final int rightfrontid = 4;
-    private static final int rightrearid = 3;
-
     // Speed Selector
-    private double[] speedModes = {0.5, 0.75, 1.0};
+    private double[] modes = {0.25, 0.5, 0.75, 1.0};
 
     // //Gyro stuff
     // private AHRS navx;
@@ -60,10 +55,10 @@ public class drivetrain extends SubsystemBase {
     // private final SimpleMotorFeedforward feedforward;
     
     private drivetrain(){
-        leftfront = new CANSparkMax(leftfrontid, MotorType.kBrushless);
-        leftrear = new CANSparkMax(leftrearid, MotorType.kBrushless);
-        rightfront = new CANSparkMax(rightfrontid, MotorType.kBrushless);
-        rightrear = new CANSparkMax(rightrearid, MotorType.kBrushless);
+        leftfront = new CANSparkMax(1,MotorType.kBrushless);
+        leftrear = new CANSparkMax(2,MotorType.kBrushless);
+        rightfront = new CANSparkMax(4,MotorType.kBrushless);
+        rightrear = new CANSparkMax(3,MotorType.kBrushless);
         // navx = new AHRS(SPI.Port.kMXP);
         // rightEncoder = new Encoder(0,1);
         // leftEncoder = new Encoder(0,2);
@@ -80,11 +75,6 @@ public class drivetrain extends SubsystemBase {
 
         leftrear.follow(leftfront);
         rightrear.follow(rightfront);
-
-        leftfront.restoreFactoryDefaults();
-        leftrear.restoreFactoryDefaults();
-        rightfront.restoreFactoryDefaults();
-        rightrear.restoreFactoryDefaults();
         
         // leftrear.set(ControlMode.Follower, leftfront.getDeviceId());
         // rightrear.set(ControlMode.Follower, rightfront.getDeviceId());   
@@ -96,19 +86,27 @@ public class drivetrain extends SubsystemBase {
         rightfront.set(0);
     }
 
-    private double SelectSpeed(double select){
-        if(select > 0.1 && select < 0.9){
-            return speedModes[1];
-        } else if(select >= 0.9){
-            return speedModes[0];
-        } else{
-            return speedModes[2];
+    private int index = 0;
+
+    private double SelectSpeed(boolean rb, boolean lb){
+       
+        //Max gear 4 = 100% min gear 1 25%
+        //right bumber is +1 vice versa
+        //You have utlize the modes array and it starts at 0
+
+        if (lb && index > 0) {
+            index--;
         }
+        if (rb && index < modes.length - 1) {
+            index++;
+        }
+
+        return modes[index];
     }
 
-    public void Drivecode(double Leftjoy, double Rightjoy, double Select) {
+    public void Drivecode(double Leftjoy, double Rightjoy, boolean rb, boolean lb){ {
 
-         double s = SelectSpeed(Select);
+        double s = SelectSpeed(rb, lb);
 
         if (Math.abs(Leftjoy) > 0.1 || Math.abs(Rightjoy) > 0.1) {
             leftfront.set((Leftjoy + Rightjoy) * s);
@@ -117,6 +115,7 @@ public class drivetrain extends SubsystemBase {
         } else {
             Stopdrive();
         }
+    }
 
      
     }
